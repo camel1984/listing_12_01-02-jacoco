@@ -44,7 +44,6 @@ task integrationTestReport (type: JacocoReport) {
 
     executionData project.tasks.integrationTest
     def reportDir = project.reporting.file("jacoco/integrationTest/html")
-//    def reportDir = project.reporting.file("jacoco/test/html")
 
     sourceDirectories = project.files(project.sourceSets.main.allSource.srcDirs)
     classDirectories = project.sourceSets.main.output
@@ -57,11 +56,28 @@ task integrationTestReport (type: JacocoReport) {
     }
 }
 
+task allTestReport (type: JacocoReport) {
+
+    executionData project.tasks.integrationTest, project.tasks.test
+    def reportDir = project.reporting.file("jacoco/all/html")
+
+    sourceDirectories = project.files(project.sourceSets.main.allSource.srcDirs)
+    classDirectories = project.sourceSets.main.output
+
+    reports {
+        html.destination = reportDir
+    }
+    doLast {
+        println "See report at: file://${reportDir.toURI().path}index.html"
+    }
+}
+allTestReport.dependsOn integrationTestReport
+
 integrationTestReport.dependsOn integrationTest
 
 integrationTest.dependsOn jacocoTestReport
 
 jacocoTestReport.dependsOn test
 
-check.dependsOn integrationTestReport
+check.dependsOn allTestReport
 
